@@ -83,7 +83,7 @@ class NMT(nn.Module):
         self.c_projection = nn.Linear(2*hidden_size, hidden_size, bias=False)
         self.att_projection = nn.Linear(2*hidden_size, hidden_size, bias=False)
         self.combined_output_projection = nn.Linear(3*hidden_size, hidden_size, bias=False)
-        self.target_vocab_projection = nn.Linear(len(self.vocab.tgt), hidden_size, bias=False)
+        self.target_vocab_projection = nn.Linear(hidden_size, len(self.vocab.tgt), bias=False)
         self.dropout = nn.Dropout(p=self.dropout_rate)
 
 
@@ -445,6 +445,7 @@ class NMT(nn.Module):
 
             live_hyp_num = beam_size - len(completed_hypotheses)
             contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t).view(-1)
+            #contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t).view(-1)
             top_cand_hyp_scores, top_cand_hyp_pos = torch.topk(contiuating_hyp_scores, k=live_hyp_num)
 
             prev_hyp_ids = top_cand_hyp_pos / len(self.vocab.tgt)
