@@ -372,6 +372,7 @@ class NMT(nn.Module):
         # a_t = torch.squeeze(a_t)
         # dec_hidden = torch.squeeze(dec_hidden)
         U_t = torch.cat((torch.squeeze(dec_hidden), torch.squeeze(a_t)), dim = -1)
+        print('U_t: ', U_t.shape)
         V_t = self.combined_output_projection(U_t)
         O_t = self.dropout(torch.tanh(V_t))
 
@@ -458,12 +459,9 @@ class NMT(nn.Module):
             #print('before view: ', contiuating_hyp_scores.shape)
             contiuating_hyp_scores = contiuating_hyp_scores.view(-1)
             #contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t).view(-1)
-            print('contiuating_hyp_scores shape:', contiuating_hyp_scores.shape)
             top_cand_hyp_scores, top_cand_hyp_pos = torch.topk(contiuating_hyp_scores, k=live_hyp_num)
             prev_hyp_ids = top_cand_hyp_pos / len(self.vocab.tgt)
             hyp_word_ids = top_cand_hyp_pos % len(self.vocab.tgt)
-            print(prev_hyp_ids)
-            print(hyp_word_ids)
 
             new_hypotheses = []
             live_hyp_ids = []
@@ -475,8 +473,6 @@ class NMT(nn.Module):
                 cand_new_hyp_score = cand_new_hyp_score.item()
 
                 hyp_word = self.vocab.tgt.id2word[hyp_word_id]
-                print(hypotheses)
-                print(prev_hyp_id)
                 new_hyp_sent = hypotheses[prev_hyp_id] + [hyp_word]
                 if hyp_word == '</s>':
                     completed_hypotheses.append(Hypothesis(value=new_hyp_sent[1:-1],
