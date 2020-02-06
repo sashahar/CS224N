@@ -439,9 +439,7 @@ class NMT(nn.Module):
             y_tm1 = torch.tensor([self.vocab.tgt[hyp[-1]] for hyp in hypotheses], dtype=torch.long, device=self.device)
             y_t_embed = self.model_embeddings.target(y_tm1)
 
-            print(y_t_embed.shape)
-            print(att_tm1.reshape((-1, 1)))
-            x = torch.cat([y_t_embed, att_tm1.reshape((-1, 1))], dim=-1)
+            x = torch.cat([y_t_embed, att_tm1], dim=-1)
             print('x shape: ', x.shape)
 
             (h_t, cell_t), att_t, _  = self.step(x, h_tm1,
