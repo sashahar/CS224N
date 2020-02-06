@@ -380,7 +380,7 @@ class NMT(nn.Module):
         ### END YOUR CODE
 
         combined_output = O_t
-        print('combined output sz:', combined_output.shape, ' should be:', dec_state.shape)
+        print('combined output sz:', combined_output.shape, ' should be:', dec_state[0].shape)
         return dec_state, combined_output, e_t
 
     def generate_sent_masks(self, enc_hiddens: torch.Tensor, source_lengths: List[int]) -> torch.Tensor:
