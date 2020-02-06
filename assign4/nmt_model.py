@@ -380,6 +380,8 @@ class NMT(nn.Module):
         ### END YOUR CODE
 
         combined_output = O_t
+        print('combined output sz:')
+        print(combined_output.shape)
         return dec_state, combined_output, e_t
 
     def generate_sent_masks(self, enc_hiddens: torch.Tensor, source_lengths: List[int]) -> torch.Tensor:
@@ -449,6 +451,7 @@ class NMT(nn.Module):
             live_hyp_num = beam_size - len(completed_hypotheses)
             contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t.unsqueeze(1)) + log_p_t).view(-1)
             #contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t).view(-1)
+            print('contiuating_hyp_scores shape:', contiuating_hyp_scores.shape)
             top_cand_hyp_scores, top_cand_hyp_pos = torch.topk(contiuating_hyp_scores, k=live_hyp_num)
             prev_hyp_ids = top_cand_hyp_pos / len(self.vocab.tgt)
             hyp_word_ids = top_cand_hyp_pos % len(self.vocab.tgt)
