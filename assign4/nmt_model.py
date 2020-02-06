@@ -457,7 +457,7 @@ class NMT(nn.Module):
             # print('log_p_t shape:', log_p_t.shape)
             # print(hyp_scores.shape)
             # print('after expand_as: ', hyp_scores.unsqueeze(1).expand_as(log_p_t.unsqueeze(1)).shape)
-            contiuating_hyp_scores = (hyp_scores.expand_as(log_p_t) + log_p_t)
+            contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t)
             #print('before view: ', contiuating_hyp_scores.shape)
             contiuating_hyp_scores = contiuating_hyp_scores.view(-1)
             #contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t).view(-1)
