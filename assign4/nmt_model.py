@@ -383,7 +383,6 @@ class NMT(nn.Module):
         ### END YOUR CODE
 
         combined_output = O_t
-        print('combined output sz:', combined_output.shape, ' should be:', dec_state[0].shape)
         return dec_state, combined_output, e_t
 
     def generate_sent_masks(self, enc_hiddens: torch.Tensor, source_lengths: List[int]) -> torch.Tensor:
@@ -440,17 +439,13 @@ class NMT(nn.Module):
 
             y_tm1 = torch.tensor([self.vocab.tgt[hyp[-1]] for hyp in hypotheses], dtype=torch.long, device=self.device)
             y_t_embed = self.model_embeddings.target(y_tm1)
-            print(y_t_embed.shape)
-            print(att_tm1.shape)
 
             x = torch.cat([y_t_embed, att_tm1], dim=-1)
-            print('x shape: ', x.shape)
 
             (h_t, cell_t), att_t, _  = self.step(x, h_tm1,
                                                       exp_src_encodings, exp_src_encodings_att_linear, enc_masks=None)
 
             # log probabilities over target words
-            print("att shape: ", att_t.shape)
             log_p_t = F.log_softmax(self.target_vocab_projection(att_t), dim=-1)
 
             live_hyp_num = beam_size - len(completed_hypotheses)
@@ -491,7 +486,7 @@ class NMT(nn.Module):
             h_tm1 = (h_t[live_hyp_ids], cell_t[live_hyp_ids])
             att_tm1 = att_t[live_hyp_ids]
             # att_tm1 = att_tm1.reshape((-1, 1))
-            print('expect this to be (5, 256):  ', att_tm1.shape)
+            # print('expect this to be (5, 256):  ', att_tm1.shape)
 
 
             hypotheses = new_hypotheses
