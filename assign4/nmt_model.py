@@ -327,6 +327,7 @@ class NMT(nn.Module):
         ###         https://pytorch.org/docs/stable/torch.html#torch.unsqueeze
         ###     Tensor Squeeze:
         ###         https://pytorch.org/docs/stable/torch.html#torch.squeeze
+        b = Ybar_t.shape[0]
         dec_state = self.decoder(Ybar_t, dec_state)
         (dec_hidden, dec_cell) = dec_state
         dec_hidden = torch.unsqueeze(dec_hidden, dim = -1)
@@ -372,10 +373,9 @@ class NMT(nn.Module):
         # a_t = torch.squeeze(a_t)
         # dec_hidden = torch.squeeze(dec_hidden)
         # U_t = torch.cat((torch.squeeze(dec_hidden), torch.squeeze(a_t)), dim = -1)
-        U_t = torch.cat((dec_hidden, a_t), dim = -1)
-        print('U_t: ', U_t.shape)
+        U_t = torch.cat((dec_hidden, a_t), dim = 1).reshape((b, -1))
+        # print('U_t: ', U_t.shape)
         V_t = self.combined_output_projection(U_t)
-        print('V_t: ', V_t.shape)
         O_t = self.dropout(torch.tanh(V_t))
 
         # import ipdb; ipdb.set_trace()
