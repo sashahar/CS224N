@@ -375,6 +375,8 @@ class NMT(nn.Module):
         V_t = self.combined_output_projection(U_t)
         O_t = self.dropout(torch.tanh(V_t))
 
+        # import ipdb; ipdb.set_trace()
+
         ### END YOUR CODE
 
         combined_output = O_t
@@ -436,6 +438,7 @@ class NMT(nn.Module):
             y_t_embed = self.model_embeddings.target(y_tm1)
 
             x = torch.cat([y_t_embed, att_tm1], dim=-1)
+            print(x.shape)
 
             (h_t, cell_t), att_t, _  = self.step(x, h_tm1,
                                                       exp_src_encodings, exp_src_encodings_att_linear, enc_masks=None)
@@ -444,7 +447,7 @@ class NMT(nn.Module):
             log_p_t = F.log_softmax(self.target_vocab_projection(att_t), dim=-1)
 
             live_hyp_num = beam_size - len(completed_hypotheses)
-            contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t).view(-1)
+            contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t.unsqueeze(1)) + log_p_t).view(-1)
             #contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t).view(-1)
             top_cand_hyp_scores, top_cand_hyp_pos = torch.topk(contiuating_hyp_scores, k=live_hyp_num)
 
