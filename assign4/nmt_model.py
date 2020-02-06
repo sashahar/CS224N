@@ -440,7 +440,7 @@ class NMT(nn.Module):
             y_t_embed = self.model_embeddings.target(y_tm1)
 
             x = torch.cat([y_t_embed, att_tm1], dim=-1)
-            print(x.shape)
+            print('x shape: ', x.shape)
 
             (h_t, cell_t), att_t, _  = self.step(x, h_tm1,
                                                       exp_src_encodings, exp_src_encodings_att_linear, enc_masks=None)
@@ -448,9 +448,9 @@ class NMT(nn.Module):
             # log probabilities over target words
             print(att_t.shape)
             log_p_t = F.log_softmax(self.target_vocab_projection(att_t), dim=-1)
-            print(log_p_t.shape)
 
             live_hyp_num = beam_size - len(completed_hypotheses)
+            print('log_p_t shape:', log_p_t.shape)
             contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t.unsqueeze(1)) + log_p_t).view(-1)
             #contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t) + log_p_t).view(-1)
             print('contiuating_hyp_scores shape:', contiuating_hyp_scores.shape)
