@@ -493,7 +493,9 @@ class NMT(nn.Module):
             live_hyp_ids = torch.tensor(live_hyp_ids, dtype=torch.long, device=self.device)
             h_tm1 = (h_t[live_hyp_ids], cell_t[live_hyp_ids])
             att_tm1 = att_t[live_hyp_ids]
+            att_tm1 = att_tm1.reshape((-1, 1))
             print('att:  ', att_tm1.shape)
+
 
             hypotheses = new_hypotheses
             hyp_scores = torch.tensor(new_hyp_scores, dtype=torch.float, device=self.device)
