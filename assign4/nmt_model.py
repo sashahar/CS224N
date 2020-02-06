@@ -374,6 +374,7 @@ class NMT(nn.Module):
         U_t = torch.cat((torch.squeeze(dec_hidden), torch.squeeze(a_t)), dim = -1)
         print('U_t: ', U_t.shape)
         V_t = self.combined_output_projection(U_t)
+        print('V_t: ', V_t.shape)
         O_t = self.dropout(torch.tanh(V_t))
 
         # import ipdb; ipdb.set_trace()
