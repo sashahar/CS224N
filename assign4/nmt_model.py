@@ -446,7 +446,9 @@ class NMT(nn.Module):
                                                       exp_src_encodings, exp_src_encodings_att_linear, enc_masks=None)
 
             # log probabilities over target words
+            print(att_t.shape)
             log_p_t = F.log_softmax(self.target_vocab_projection(att_t), dim=-1)
+            print(log_p_t.shape)
 
             live_hyp_num = beam_size - len(completed_hypotheses)
             contiuating_hyp_scores = (hyp_scores.unsqueeze(1).expand_as(log_p_t.unsqueeze(1)) + log_p_t).view(-1)
