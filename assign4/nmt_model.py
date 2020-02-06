@@ -490,7 +490,7 @@ class NMT(nn.Module):
             live_hyp_ids = torch.tensor(live_hyp_ids, dtype=torch.long, device=self.device)
             h_tm1 = (h_t[live_hyp_ids], cell_t[live_hyp_ids])
             att_tm1 = att_t[live_hyp_ids]
-            att_tm1 = att_tm1.reshape((-1, 1))
+            # att_tm1 = att_tm1.reshape((-1, 1))
             print('expect this to be (5, 256):  ', att_tm1.shape)
 
 
