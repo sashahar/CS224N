@@ -440,8 +440,8 @@ class NMT(nn.Module):
             y_t_embed = self.model_embeddings.target(y_tm1)
 
             print(y_t_embed.shape)
-            print(att_tm1.shape)
-            x = torch.cat([y_t_embed, att_tm1], dim=-1)
+            print(att_tm1.reshape((-1, 1)))
+            x = torch.cat([y_t_embed, att_tm1.reshape((-1, 1))], dim=-1)
             print('x shape: ', x.shape)
 
             (h_t, cell_t), att_t, _  = self.step(x, h_tm1,
