@@ -159,7 +159,7 @@ class VocabEntry(object):
         ###         https://pytorch.org/docs/stable/tensors.html#torch.Tensor.view
         words_numeric = self.words2charindices(sents)
         sents_padded = pad_sents_char(words_numeric, char_pad_token=self.char_pad) #shape (batch_size, max_sentence_length, max_word_length)
-        sents_padded = torch.LongTensor(sents_padded, device = device)
+        sents_padded = torch.tensor(sents_padded, dtype = torch.long, device = device)
         out = sents_padded.transpose(0,1).contiguous() #want shape (max_sentence_length, batch_size, max_word_length)
         return out
         ### END YOUR CODE
