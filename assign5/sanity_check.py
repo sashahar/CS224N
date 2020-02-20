@@ -6,6 +6,8 @@ CS224N 2019-20: Homework 5
 sanity_check.py: sanity checks for assignment 5
 Usage:
     sanity_check.py 1e
+    sanity_check.py 1f
+    sanity_check.py 1g
     sanity_check.py 1h
     sanity_check.py 2a
     sanity_check.py 2b
@@ -26,6 +28,8 @@ from utils import pad_sents_char, batch_iter, read_corpus
 from vocab import Vocab, VocabEntry
 
 from char_decoder import CharDecoder
+from cnn import CNN
+from highway import Highway
 from nmt_model import NMT
 
 
@@ -51,7 +55,7 @@ class DummyVocab():
         self.end_of_word = self.char2id["}"]
 
 def question_1e_sanity_check():
-    """ Sanity check for to_input_tensor_char() function. 
+    """ Sanity check for to_input_tensor_char() function.
     """
     print ("-"*80)
     print("Running Sanity Check for Question 1e: To Input Tensor Char")
@@ -69,6 +73,68 @@ def question_1e_sanity_check():
 
     print("Sanity Check Passed for Question 1e: To Input Tensor Char!")
     print("-"*80)
+
+def question_1f_test1():
+    BATCH_SIZE = 4
+    e_word = 12
+    input_matrix = torch.randn(BATCH_SIZE, e_word)
+    output_expected_size = [BATCH_SIZE, e_word]
+    highway_layer = Highway(e_word)
+    output = highway_layer(input_matrix)
+    assert list(output.size()) == output_expected_size, "output shape is incorrect: it should be:\n {} but is:\n{}".format(output_expected_size, list(output.size()))
+
+def question_1f_test2():
+    BATCH_SIZE = 2
+    e_word = 3
+    input_matrix = torch.Tensor([[1.0, 1.0, 1.0], [0.0, 0.0, 0.0]])
+    expected_output = torch.Tensor([[0.4677, 0.8527, 0.0000],[0.3176, 0.0000, 0.0038]])
+    output_expected_size = [BATCH_SIZE, e_word]
+    highway_layer = Highway(e_word)
+    output = highway_layer(input_matrix)
+    assert not torch.allclose(output, expected_output), "output is incorrect: it should be:\n {} but is:\n{}".format(expected_output, output)
+
+
+def question_1f_sanity_check():
+    print("Running Sanity Check for Question 1f: Highway")
+    question_1f_test1()
+    question_1f_test2()
+    print("Sanity Check Passed for Question 1f: Highway")
+    print("-"*80)
+
+def question_1g_test1():
+    e_char = 2
+    m_word = 10
+    e_word = 12
+    batch = 3
+    expected_output_size = [batch, e_word]
+    input_matrix = torch.randn(batch, e_char, m_word)
+    cnn = CNN(e_char, e_word)
+    out = cnn(input_matrix)
+    assert list(out.size()) == expected_output_size, "output shape is incorrect: it should be:\n {} but is:\n{}".format(expected_output_size, list(out.size()))
+
+def question_1g_test2():
+    e_char = 5
+    m_word = 4
+    e_word = 4
+    batch = 2
+    expected_output_size = [batch, e_word]
+    expected_output = torch.Tensor([[[0.0789, 0.0789],
+         [0.0261, 0.0261],
+         [0.1558, 0.1558],
+         [0.1651, 0.1651]]]).T
+    input_matrix = torch.zeros(batch, e_char, m_word)
+    cnn = CNN(e_char, e_word)
+    out = cnn(input_matrix)
+    assert torch.allclose(out[0:1], out[1:]), "output is incorrect: it should be:\n {} but is:\n{}".format(expected_output, out)
+
+
+def question_1g_sanity_check():
+    print("Running Sanity Check for Question 1g: CNN")
+    question_1g_test1()
+    question_1g_test2()
+    print("Sanity Check passed for Question 1g: CNN")
+    print("-"*80)
+
 
 def question_1h_sanity_check(model):
     """ Sanity check for model_embeddings.py
@@ -98,7 +164,7 @@ def question_2a_sanity_check(decoder, char_vocab):
     inpt = torch.zeros(sequence_length, BATCH_SIZE, dtype=torch.long)
     logits, (dec_hidden1, dec_hidden2) = decoder.forward(inpt)
     logits_expected_size = [sequence_length, BATCH_SIZE, len(char_vocab.char2id)]
-    dec_hidden_expected_size = [1, BATCH_SIZE, HIDDEN_SIZE]
+    dec_hidden_expected_size = [1, BATCH_SIZE, HIDDEN_SIZE] #1, 5, 4
     assert(list(logits.size()) == logits_expected_size), "Logits shape is incorrect:\n it should be {} but is:\n{}".format(logits_expected_size, list(logits.size()))
     assert(list(dec_hidden1.size()) == dec_hidden_expected_size), "Decoder hidden state shape is incorrect:\n it should be {} but is: {}".format(dec_hidden_expected_size, list(dec_hidden1.size()))
     assert(list(dec_hidden2.size()) == dec_hidden_expected_size), "Decoder hidden state shape is incorrect:\n it should be {} but is: {}".format(dec_hidden_expected_size, list(dec_hidden2.size()))
@@ -131,6 +197,7 @@ def question_2c_sanity_check(decoder):
     initialStates = (inpt, inpt)
     device = decoder.char_output_projection.weight.device
     decodedWords = decoder.decode_greedy(initialStates, device)
+    print(decodedWords)
     assert(len(decodedWords) == BATCH_SIZE), "Length of decodedWords should be {} but is: {}".format(BATCH_SIZE, len(decodedWords))
     print("Sanity Check Passed for Question 2c: CharDecoder.decode_greedy()!")
     print("-"*80)
@@ -143,14 +210,13 @@ def main():
     # Check Python & PyTorch Versions
     assert (sys.version_info >= (3, 5)), "Please update your installation of Python to version >= 3.5"
     assert(torch.__version__ >= "1.0.0"), "Please update your installation of PyTorch. You have {} and you should have version 1.0.0".format(torch.__version__)
-
     # Seed the Random Number Generators
     seed = 1234
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     np.random.seed(seed * 13 // 7)
 
-    vocab = Vocab.load('./sanity_check_en_es_data/vocab_sanity_check.json') 
+    vocab = Vocab.load('./sanity_check_en_es_data/vocab_sanity_check.json')
 
     # Create NMT Model
     model = NMT(
@@ -169,6 +235,10 @@ def main():
 
     if args['1e']:
         question_1e_sanity_check()
+    elif args['1f']:
+        question_1f_sanity_check()
+    elif args['1g']:
+        question_1g_sanity_check()
     elif args['1h']:
         question_1h_sanity_check(model)
     elif args['2a']:

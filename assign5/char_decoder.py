@@ -33,9 +33,12 @@ class CharDecoder(nn.Module):
         @returns dec_hidden (tuple(Tensor, Tensor)): internal state of the LSTM after reading the input characters. A tuple of two tensors of shape (1, batch, hidden_size)
         """
         ### YOUR CODE HERE for part 2a
-        ### TODO - Implement the forward pass of the character decoder.
-        
-        ### END YOUR CODE 
+        embeddings = self.decoderCharEmb(input)
+        out, new_hidden = self.charDecoder(embeddings, dec_hidden)
+        scores = self.char_output_projection(out)
+        return scores, new_hidden
+
+        ### END YOUR CODE
 
 
     def train_forward(self, char_sequence, dec_hidden=None):
@@ -53,7 +56,13 @@ class CharDecoder(nn.Module):
         ###       - char_sequence corresponds to the sequence x_1 ... x_{n+1} (e.g., <START>,m,u,s,i,c,<END>). Read the handout about how to construct input and target sequence of CharDecoderLSTM.
         ###       - Carefully read the documentation for nn.CrossEntropyLoss and our handout to see what this criterion have already included:
         ###             https://pytorch.org/docs/stable/nn.html#crossentropyloss
-        
+        input = char_sequence[:-1]
+        target = char_sequence[1:].contiguous().flatten()
+        s_t, new_hidden = self.forward(input, dec_hidden)
+        s_t = s_t.flatten(end_dim = -2)
+        loss_obj = nn.CrossEntropyLoss(ignore_index = self.target_vocab.char_pad, reduction= 'sum')
+        total_loss = loss_obj(s_t, target)
+        return total_loss
         ### END YOUR CODE
 
     def decode_greedy(self, initialStates, device, max_length=21):
@@ -75,6 +84,31 @@ class CharDecoder(nn.Module):
         ###      - You may find torch.argmax or torch.argmax useful
         ###      - We use curly brackets as start-of-word and end-of-word characters. That is, use the character '{' for <START> and '}' for <END>.
         ###        Their indices are self.target_vocab.start_of_word and self.target_vocab.end_of_word, respectively.
-
+        _, batch_sz, hidden_sz = initialStates[0].shape
+        hidden = initialStates
+        current_char = torch.tensor(self.target_vocab.start_of_word, device = device)
+        current_char = current_char.repeat(1, batch_sz)
+        output = current_char
+        for t in range(max_length - 1):
+            scores, new_hidden = self.forward(current_char, hidden)
+            probs = torch.softmax(scores, dim = -1)
+            current_char = torch.argmax(probs, dim = -1)
+            if t == 0:
+                output = torch.unsqueeze(current_char, dim = -1)
+            else:
+                output = torch.cat((output, torch.unsqueeze(current_char, dim = -1)), dim = -1)
+            hidden = new_hidden
+        #reshape output
+        output = output.view((batch_sz, -1))
+        sents = []
+        batch, word_len = output.shape
+        for i in range(batch):
+            curr_word = []
+            for j in range(word_len):
+                new_char = self.target_vocab.id2char[output[i, j].item()]
+                if new_char == self.target_vocab.id2char[self.target_vocab.end_of_word]:
+                    break
+                curr_word.append(new_char)
+            sents.append(''.join(curr_word))
+        return sents
         ### END YOUR CODE
-

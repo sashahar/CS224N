@@ -157,9 +157,10 @@ class VocabEntry(object):
         ###     - You may find .contiguous() useful after reshaping. Check the following links for more details:
         ###         https://pytorch.org/docs/stable/tensors.html#torch.Tensor.contiguous
         ###         https://pytorch.org/docs/stable/tensors.html#torch.Tensor.view
-        words_numeric = words2charindices(sents)
-        sents_padded = pad_sents_char(words_numeric, char_pad_token=self.char2id) #shape (batch_size, max_sentence_length, max_word_length)
-        out = torch.Tensor(sents_padded).transpose((1,0,2)).contiguous() #want shape (max_sentence_length, batch_size, max_word_length)
+        words_numeric = self.words2charindices(sents)
+        sents_padded = pad_sents_char(words_numeric, char_pad_token=self.char_pad) #shape (batch_size, max_sentence_length, max_word_length)
+        sents_padded = torch.LongTensor(sents_padded)
+        out = sents_padded.transpose(0,1).contiguous() #want shape (max_sentence_length, batch_size, max_word_length)
         return out
         ### END YOUR CODE
 
