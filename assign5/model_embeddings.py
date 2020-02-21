@@ -67,7 +67,7 @@ class ModelEmbeddings(nn.Module):
         ### YOUR CODE HERE for part 1h
         sentence_length, batch_size, max_word_length = x_padded.shape
         input_tensor = self.embedding(x_padded)
-        input_tensor = input_tensor.permute(0, 1, 3, 2).reshape((sentence_length*batch_size, self.e_char,-1))
+        input_tensor = input_tensor.permute(0, 1, 3, 2).contiguous().reshape((sentence_length*batch_size, self.e_char,-1))
         x_conv_out = self.cnn(input_tensor)
         x_highway = self.highway(x_conv_out)
         x_word_embed = self.dropout(x_highway)
